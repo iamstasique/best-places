@@ -1,0 +1,22 @@
+.point-form {
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  .point-form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .point-form-actions {
+    display: flex;
+    gap: 10px;
+
+    > button {
+      flex: 1;
+    }
+  }
+}

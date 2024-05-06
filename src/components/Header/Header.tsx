@@ -4,9 +4,7 @@ import IconButton from '@mui/material/IconButton';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
-
-// TODO: вынести в отдельный файл
-const drawerWidth = 240;
+import { DRAWER_WIDTH } from '../../constants/drawer.constants';
 
 interface AppBarProps {
   open?: boolean;
@@ -20,12 +18,12 @@ const AppBar = styled(MuiAppBar, {
     duration: theme.transitions.duration.leavingScreen,
   }),
   ...(open && {
-    width: `calc(100% - ${drawerWidth}px)`,
+    width: `calc(100% - ${DRAWER_WIDTH}px)`,
     transition: theme.transitions.create(['margin', 'width'], {
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    marginRight: drawerWidth,
+    marginRight: DRAWER_WIDTH,
   }),
 }));
 

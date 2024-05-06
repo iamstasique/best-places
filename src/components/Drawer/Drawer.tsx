@@ -3,6 +3,9 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { styled, useTheme } from '@mui/material';
 import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
+import PointForm from '../PointForm/PointForm';
+import style from './Drawer.module.scss';
+import { DRAWER_WIDTH } from '../../constants/drawer.constants';
 
 const DrawerHeader = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -12,8 +15,6 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   ...theme.mixins.toolbar,
   justifyContent: 'flex-start',
 }));
-
-const drawerWidth = 240;
 
 function DrawerComponent({
   selectedCoordinates,
@@ -29,10 +30,10 @@ function DrawerComponent({
   return (
     <Drawer
       sx={{
-        width: drawerWidth,
+        width: DRAWER_WIDTH,
         flexShrink: 0,
         '& .MuiDrawer-paper': {
-          width: drawerWidth,
+          width: DRAWER_WIDTH,
         },
       }}
       variant='persistent'
@@ -43,7 +44,9 @@ function DrawerComponent({
         <IconButton onClick={handleDrawerClose}>{theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon />}</IconButton>
         New Point
       </DrawerHeader>
-      {selectedCoordinates.length ? selectedCoordinates : <p>Please select a point on the map</p>}
+      <div className={style['drawer-content']}>
+        {selectedCoordinates.length ? <PointForm selectedCoordinates={selectedCoordinates} /> : <p>Please select a point on the map</p>}
+      </div>
     </Drawer>
   );
 }
