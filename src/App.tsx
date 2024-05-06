@@ -1,8 +1,8 @@
 import './App.css';
-import MapComponent from './components/Map/Map';
+import MainComponent from './pages/Main/Main';
 
 function App() {
-  return <MapComponent />;
+  return <MainComponent />;
 }
 
 export default App;

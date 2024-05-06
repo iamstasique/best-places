@@ -1,26 +1,26 @@
 import {
-  Map,
-  MapBrowserEvent, //objects
-  View,
+    Map,
+    MapBrowserEvent, //objects
+    View,
 } from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
 import { XYZ } from 'ol/source';
 import VectorSource from 'ol/source/Vector';
-import React, { memo, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
-const MapComponent = memo(() => {
+function MapComponent({ handleDrawerOpen }: { handleDrawerOpen: any }) {
   const mapDivFer = React.createRef<HTMLDivElement>();
 
   const source: VectorSource = new VectorSource({ features: undefined });
   const layer: VectorLayer<any> = new VectorLayer({ source });
 
-  const onMaoClick = (event: MapBrowserEvent<any>) => {
+  const onMapClick = (event: MapBrowserEvent<any>) => {
     // const featureToAdd = new Feature({
     //   geometry: new Point(event.coordinate),
     // });
 
-    console.log(event.coordinate);
+    handleDrawerOpen(event.coordinate);
 
     // cons`t style = new Style({
     //   image: new Circle(event.coordinate, 6),
@@ -36,7 +36,6 @@ const MapComponent = memo(() => {
   };
 
   useEffect(() => {
-    //  mapDivFer.current && map.setTarget(mapDivFer.current);
     const map = new Map({
       target: mapDivFer.current ?? '',
       layers: [
@@ -53,12 +52,12 @@ const MapComponent = memo(() => {
     });
 
     map.addLayer(layer);
-    map.on('singleclick', onMaoClick);
+    map.on('singleclick', onMapClick);
 
     return () => map.setTarget('');
   }, [mapDivFer]);
 
   return <div ref={mapDivFer} style={{ height: '100vh', width: '100vw' }} className='map' />;
-});
+}
 
 export default MapComponent;
