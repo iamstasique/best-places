@@ -1,13 +1,8 @@
 import './App.css';
+import MapComponent from './components/Map/Map';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        Header
-      </header>
-    </div>
-  );
+  return <MapComponent />;
 }
 
 export default App;
