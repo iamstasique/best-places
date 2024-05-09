@@ -1,18 +1,22 @@
 import { Button, TextField } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CoordinatePlane } from '../../enums/coordinate-plane.enum';
 import style from './PointForm.module.scss';
-import { Point } from '../../types/point-form.type';
+import { MapPoint } from '../../types/point-form.type';
+import { useSendPointMutation } from '../../api/points.api';
 
 function PointForm({ selectedCoordinates }: { selectedCoordinates: number[] }) {
-  const initialPointForm: Point = {
-    title: '',
-    description: '',
-    coordinates: {
-      [CoordinatePlane.X]: selectedCoordinates[0],
-      [CoordinatePlane.Y]: selectedCoordinates[1],
-    },
-  };
+  const initialPointForm: MapPoint = useMemo(
+    () => ({
+      title: '',
+      description: '',
+      coordinates: {
+        [CoordinatePlane.X]: selectedCoordinates[0],
+        [CoordinatePlane.Y]: selectedCoordinates[1],
+      },
+    }),
+    []
+  );
 
   const [pointForm, setPointForm] = useState(initialPointForm);
 
@@ -22,7 +26,7 @@ function PointForm({ selectedCoordinates }: { selectedCoordinates: number[] }) {
         ...initialPointForm,
         coordinates: { [CoordinatePlane.X]: selectedCoordinates[0], [CoordinatePlane.Y]: selectedCoordinates[1] },
       }),
-    [selectedCoordinates]
+    [initialPointForm, selectedCoordinates]
   );
 
   const updateCoordinates = function (coordinatePlane: CoordinatePlane, newValue: number) {
@@ -38,6 +42,13 @@ function PointForm({ selectedCoordinates }: { selectedCoordinates: number[] }) {
   const updateDescription = function (description: string) {
     // TODO: если залогать, то будет выводиться предыдущее значение
     setPointForm({ ...pointForm, description });
+  };
+
+  const [sendForm] = useSendPointMutation();
+  const onSubmitForm = function () {
+    // resetForm()
+
+    sendForm(pointForm);
   };
 
   return (
@@ -85,7 +96,9 @@ function PointForm({ selectedCoordinates }: { selectedCoordinates: number[] }) {
 
       {/* TODO: сделать блокировку конпку если какое-то из полей не валидно */}
       <div className={style['point-form-actions']}>
-        <Button variant='contained'>Save</Button>
+        <Button variant='contained' onClick={() => onSubmitForm()}>
+          Save
+        </Button>
         <Button variant='outlined' color='error'>
           Reset
         </Button>

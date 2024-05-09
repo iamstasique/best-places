@@ -5,7 +5,7 @@ export type Coordinates = {
   [CoordinatePlane.Y]: number;
 };
 
-export type Point = {
+export type MapPoint = {
   id?: any;
   title: string;
   description: string;

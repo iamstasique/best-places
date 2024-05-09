@@ -7,14 +7,14 @@ function MainComponent() {
   const [open, setOpen] = React.useState(false);
   const [selectedCoordinates, setSelectedCoordinates]: [number[], any] = React.useState([]);
 
-  const handleDrawerOpen = (coordinates: number[]) => {
+  const handleDrawerOpen = React.useCallback((coordinates: number[]) => {
     const clickFromTheMap = Array.isArray(coordinates);
     if (clickFromTheMap) {
       setSelectedCoordinates(coordinates);
     }
 
     setOpen(true);
-  };
+  }, []);
 
   const handleDrawerClose = () => {
     setOpen(false);
