@@ -1,3 +1,4 @@
+import * as bootstrap from 'bootstrap';
 import {
   Map,
   MapBrowserEvent,
@@ -5,11 +6,9 @@ import {
   View,
 } from 'ol';
 import Feature from 'ol/Feature.js';
-import { toStringHDMS } from 'ol/coordinate';
 import Point from 'ol/geom/Point';
 import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
-import { toLonLat } from 'ol/proj';
 import { XYZ } from 'ol/source';
 import VectorSource from 'ol/source/Vector';
 import React, { RefObject, useEffect } from 'react';
@@ -22,7 +21,6 @@ function setPoints(points: MapPoint[]): VectorLayer<VectorSource<Feature<Point>>
   }
 
   const resultArr = [];
-  
   for (const point of points) {
     const iconFeature = new Feature({
       geometry: new Point([point.coordinates.x, point.coordinates.y]),
@@ -54,7 +52,7 @@ function MapComponent({ handleDrawerOpen }: { handleDrawerOpen: any }) {
     const source: VectorSource = new VectorSource({ features: undefined });
     const layer: VectorLayer<any> = new VectorLayer({ source });
 
-    const overlay = new Overlay({
+    const popup = new Overlay({
       element: popupDivFer.current ?? undefined,
     });
 
@@ -71,22 +69,36 @@ function MapComponent({ handleDrawerOpen }: { handleDrawerOpen: any }) {
         center: [2338378.964363548, 6842137.232060028],
         zoom: 15,
       }),
-      overlays: [overlay],
     });
 
     const onMapClick = (event: MapBrowserEvent<any>) => {
-      if (!contentDivFer.current) {
+      if (!popupDivFer.current) {
         return;
       }
 
+      const element = popup.getElement() as Element;
+      let popover = bootstrap.Popover.getInstance(element);
       const coordinate = event.coordinate;
-      const hdms = toStringHDMS(toLonLat(coordinate));
 
-      contentDivFer.current.innerHTML = '<p>You clicked here:</p><code>' + hdms + '</code>';
-      overlay.setPosition(coordinate);
+      if (popover) {
+        popover.dispose();
+      }
+
+      popup.setPosition(coordinate);
+      popover = new bootstrap.Popover(element, {
+        animation: true,
+        container: element,
+        content: '<span>Fill form and save this point</span>',
+        html: true,
+        placement: 'top',
+        // title: 'Welcome to OpenLayers',
+      });
+      popover.show();
+
       handleDrawerOpen(event.coordinate);
     };
 
+    map.addOverlay(popup);
     map.addLayer(layer);
     map.on('singleclick', onMapClick);
 
@@ -95,10 +107,8 @@ function MapComponent({ handleDrawerOpen }: { handleDrawerOpen: any }) {
 
   return (
     <>
-      <div ref={mapDivFer} style={{ height: '100vh', width: '100vw' }} className='map' />
-
-      <div ref={popupDivFer as React.RefObject<HTMLDivElement>} id='popup' className='ol-popup' style={{ backgroundColor: '#fff' }}>
-        <div ref={contentDivFer as RefObject<HTMLDivElement>} id='popup-content'></div>
+      <div ref={mapDivFer} style={{ height: '100vh', width: '100vw' }} />
+      <div ref={popupDivFer as React.RefObject<HTMLDivElement>}>
       </div>
     </>
   );
