@@ -1,59 +1,31 @@
-import * as bootstrap from 'bootstrap';
 import {
   Map,
   MapBrowserEvent,
   Overlay, //objects
   View,
 } from 'ol';
-import Feature from 'ol/Feature.js';
-import Point from 'ol/geom/Point';
 import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
 import { XYZ } from 'ol/source';
 import VectorSource from 'ol/source/Vector';
 import React, { RefObject, useEffect } from 'react';
 import { useGetPointsQuery } from '../../api/points.api';
-import { MapPoint } from '../../types/point-form.type';
-
-function setPoints(points: MapPoint[]): VectorLayer<VectorSource<Feature<Point>>>[] {
-  if (!points) {
-    return [];
-  }
-
-  const resultArr = [];
-  for (const point of points) {
-    const iconFeature = new Feature({
-      geometry: new Point([point.coordinates.x, point.coordinates.y]),
-      name: point.title,
-    });
-
-    const vectorSource = new VectorSource({
-      features: [iconFeature],
-    });
-
-    const vectorLayer = new VectorLayer({
-      source: vectorSource,
-    });
-
-    resultArr.push(vectorLayer);
-  }
-
-  return resultArr;
-}
+import { onMapClickHelper, onPointHoverHelper, setPointsHelper } from '../helpers/map.helper';
 
 function MapComponent({ handleDrawerOpen }: { handleDrawerOpen: any }) {
-  const mapDivFer: RefObject<HTMLDivElement> = React.createRef<HTMLDivElement>();
-  const popupDivFer: RefObject<HTMLElement> = React.createRef<HTMLElement>();
-  const contentDivFer: RefObject<HTMLElement> = React.createRef<HTMLElement>();
+  const mapDivRef: RefObject<HTMLDivElement> = React.createRef<HTMLDivElement>();
+  const popupDivRef: RefObject<HTMLElement> = React.createRef<HTMLElement>();
+  const contentDivRef: RefObject<HTMLElement> = React.createRef<HTMLElement>();
 
   const { data: points } = useGetPointsQuery('');
 
+  // TODO: надо сделать так, чтобы после добавления точки не обновлялась карта, но точка добавлялась (если возможно)
   useEffect(() => {
     const source: VectorSource = new VectorSource({ features: undefined });
     const layer: VectorLayer<any> = new VectorLayer({ source });
 
-    const popup = new Overlay({
-      element: popupDivFer.current ?? undefined,
+    const popupOverlay = new Overlay({
+      element: popupDivRef.current ?? undefined,
     });
 
     const tileLayer = new TileLayer({
@@ -63,8 +35,8 @@ function MapComponent({ handleDrawerOpen }: { handleDrawerOpen: any }) {
     });
 
     const map = new Map({
-      target: mapDivFer.current ?? '',
-      layers: [tileLayer, ...setPoints(points)],
+      target: mapDivRef.current ?? '',
+      layers: [tileLayer, ...setPointsHelper(points)],
       view: new View({
         center: [2338378.964363548, 6842137.232060028],
         zoom: 15,
@@ -72,44 +44,26 @@ function MapComponent({ handleDrawerOpen }: { handleDrawerOpen: any }) {
     });
 
     const onMapClick = (event: MapBrowserEvent<any>) => {
-      if (!popupDivFer.current) {
-        return;
-      }
-
-      const element = popup.getElement() as Element;
-      let popover = bootstrap.Popover.getInstance(element);
-      const coordinate = event.coordinate;
-
-      if (popover) {
-        popover.dispose();
-      }
-
-      popup.setPosition(coordinate);
-      popover = new bootstrap.Popover(element, {
-        animation: true,
-        container: element,
-        content: '<span>Fill form and save this point</span>',
-        html: true,
-        placement: 'top',
-        // title: 'Welcome to OpenLayers',
-      });
-      popover.show();
-
+      onMapClickHelper(popupDivRef, popupOverlay, event.coordinate);
       handleDrawerOpen(event.coordinate);
     };
+    const onPointHover = (event: MapBrowserEvent<any>) => {
+      onPointHoverHelper(map, mapDivRef, event);
+    };
 
-    map.addOverlay(popup);
+    map.addOverlay(popupOverlay);
     map.addLayer(layer);
+
     map.on('singleclick', onMapClick);
+    map.on('pointermove', onPointHover);
 
     return () => map.setTarget('');
-  }, [contentDivFer, handleDrawerOpen, mapDivFer, points, popupDivFer]);
+  }, [contentDivRef, handleDrawerOpen, mapDivRef, points, popupDivRef]);
 
   return (
     <>
-      <div ref={mapDivFer} style={{ height: '100vh', width: '100vw' }} />
-      <div ref={popupDivFer as React.RefObject<HTMLDivElement>}>
-      </div>
+      <div ref={mapDivRef} style={{ height: '100vh', width: '100vw' }} />
+      <div ref={popupDivRef as React.RefObject<HTMLDivElement>}></div>
     </>
   );
 }
